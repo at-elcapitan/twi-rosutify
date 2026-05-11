@@ -1,6 +1,6 @@
 import os
 
-from botify import __version__, __codename__
+from tgcient import __version__, __codename__
 from logger import logger
 import utils
 
