@@ -3,7 +3,7 @@ from datetime import datetime
 from aiogram import __version__ as aiogram_version
 from twikit import __version__ as twikit_version
 
-from tgcient import (
+from . import (
     __version__  as current_version, 
     __codename__ as current_codename
 )

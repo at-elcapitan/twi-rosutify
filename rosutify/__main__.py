@@ -1,25 +1,22 @@
-import os
-
-from tgcient import __version__, __codename__
-from logger import logger
-import utils
-
 from dotenv import load_dotenv
 
+from .configuration import ConfigurationEnv, CriticalEnvVarLoadException
+from .static import ENV_VARIABLES
+from .logger import logger
+from . import utils
+
 def main():
-    logger.debug("Loading environment")
     load_dotenv()
 
-    tg_api_key = os.environ.get("TG_API_KEY")
-    tw_cred_user = os.environ.get("TW_USER")
-    tw_cred_pass = os.environ.get("TW_PASSWD")
-
-    if None in [tg_api_key, tw_cred_pass, tw_cred_user]:
-        logger.critical("Envirinment variables could not be fetched")
+    try:
+        configuration = ConfigurationEnv(ENV_VARIABLES)
+    except CriticalEnvVarLoadException as e:
+        logger.critical(e)
         exit(-1)
 
     utils.print_info()
     logger.info("Starting up")
+
 
 if __name__ == "__main__":
     main()
