@@ -1,6 +1,8 @@
 import os
 from dataclasses import dataclass
 
+from dotenv import load_dotenv
+
 from .logger import logger
 
 @dataclass(frozen=True)
@@ -36,3 +38,26 @@ class ConfigurationEnv:
 
     def __getitem__(self, key: str) -> str | None:
         return self._env[key]
+
+load_dotenv()
+
+ENV_VARIABLES = [
+    EnvVar(
+        "TG_API_KEY",
+        required=True
+    ),
+    EnvVar(
+        "TW_USER",
+        required=True
+    ),
+    EnvVar(
+        "TW_PASS",
+        required=True
+    )
+]
+
+try:
+    configuration = ConfigurationEnv(ENV_VARIABLES)
+except CriticalEnvVarLoadException as e:
+    logger.critical(e)
+    exit(-1)

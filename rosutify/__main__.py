@@ -1,22 +1,17 @@
-from dotenv import load_dotenv
+import asyncio
 
-from .configuration import ConfigurationEnv, CriticalEnvVarLoadException
-from .static import ENV_VARIABLES
 from .logger import logger
+from .tgcient import bot
+from .event import event_bus
 from . import utils
 
-def main():
-    load_dotenv()
-
-    try:
-        configuration = ConfigurationEnv(ENV_VARIABLES)
-    except CriticalEnvVarLoadException as e:
-        logger.critical(e)
-        exit(-1)
-
+async def main():
     utils.print_info()
     logger.info("Starting up")
+    await event_bus.emit("test")
 
+    while True:
+        pass
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

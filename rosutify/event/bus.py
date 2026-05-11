@@ -11,18 +11,26 @@ class Bus:
         self._handlers = defaultdict(list[Handler])
         self._logger = logger
 
-    def emit(self, signal_name: str, *args, **kwargs) -> None:
+    async def emit(self, signal_name: str, *args, **kwargs) -> None:
+        tasks: list[Awaitable[Any]] = []
+
         for handler in self._handlers.get(signal_name, []):
+            res = handler(*args, **kwargs)
+
+            if asyncio.iscoroutine(res):
+                tasks.append(res)
+
             self._logger.debug(
-                "emit signal=%s handler=%s",
+                "emitted signal=%s handler=%s",
                 signal_name,
                 getattr(handler, "__qualname__", handler.__name__)
             )
 
-            asyncio.create_task(handler(*args, **kwargs))
+        await asyncio.gather(*tasks)
 
     def subscribe(self, signal_name: str):
         def dec(method: Handler) -> Handler:
             self._handlers[signal_name].append(method)
             return method
+        
         return dec
