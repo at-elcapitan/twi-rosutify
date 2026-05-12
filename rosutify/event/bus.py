@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import logging
 from collections import defaultdict
 from collections.abc import Callable, Awaitable
@@ -17,7 +18,7 @@ class Bus:
         for handler in self._handlers.get(signal_name, []):
             res = handler(*args, **kwargs)
 
-            if asyncio.iscoroutine(res):
+            if inspect.isawaitable(res):
                 tasks.append(res)
 
             self._logger.debug(
