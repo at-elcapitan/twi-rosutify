@@ -53,6 +53,10 @@ ENV_VARIABLES = [
     EnvVar(
         "TW_PASS",
         required=True
+    ),
+    EnvVar(
+        "DB_PATH",
+        required=True
     )
 ]
 

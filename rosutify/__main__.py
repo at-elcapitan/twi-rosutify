@@ -2,12 +2,14 @@ import asyncio
 
 from .logger import logger
 from .tgcient import dp, bot
-from .event import event_bus
-from . import utils
+from . import utils, db
 
 async def main():
+    logger.debug("Initializing database")
+    await db.init_db()
+
     utils.print_info()
-    logger.info("Starting up")
+    logger.info("Service ready")
 
     await dp.start_polling(bot)
 

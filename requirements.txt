@@ -2,3 +2,5 @@ aiogram
 twikit
 colorama
 python-dotenv
+sqlalchemy
+aiosqlite
