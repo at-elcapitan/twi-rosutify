@@ -20,6 +20,7 @@ class Colors:
     DIM       = '\033[2m'
     RESET     = '\033[0m'
 
+
 def print_info():
     print(f"{Colors.BLUE}╭──")
     print(f"{Colors.BLUE}│{Colors.RESET}  {Colors.BOLD}{Colors.HEADER}Rosutify{Colors.RESET} {Colors.CYAN}v{current_version}{Colors.RESET} \"{Colors.YELLOW}{current_codename}{Colors.RESET}\"")
@@ -30,3 +31,18 @@ def print_info():
     print(f"{Colors.BLUE}│{Colors.RESET}")
     print(f"{Colors.BLUE}│{Colors.RESET}  {Colors.RESET}{Colors.DIM}Started at: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}")
     print(f"{Colors.BLUE}╰──")    
+
+
+def check_loaded(func):
+    async def wrapper(*args, **kwargs):
+        if not args[0]._loaded:
+            raise ValueError("Client was not lazy loaded")
+        return await func(*args, **kwargs)
+    return wrapper
+
+def check_loaded_sync(func):
+    async def wrapper(*args, **kwargs):
+        if not args[0]._loaded:
+            raise ValueError("Client was not lazy loaded")
+        return func(*args, **kwargs)
+    return wrapper
