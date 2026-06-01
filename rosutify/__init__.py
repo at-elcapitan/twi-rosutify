@@ -1,2 +1,2 @@
-__version__ = "rosu2605b"
+__version__ = "0.0.1"
 __codename__ = "Edna"

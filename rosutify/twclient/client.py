@@ -15,9 +15,10 @@ class ClientWrapper:
         self,
         username: str,
         email: str | None,
-        password: str
+        password: str,
+        cookies_path: str | None = None
     ) -> None:
-        await self._client.login(auth_info_1=username, auth_info_2=email, password=password)
+        await self._client.login(auth_info_1=username, auth_info_2=email, password=password, cookies_file=cookies_path)
         self._loaded = True
 
     @check_loaded
@@ -30,15 +31,13 @@ class ClientWrapper:
         await account.load_user(self._client)
         self._listened_accounts[account.get_id()] = account
 
-    @check_loaded_sync
-    def add_community(self, account_id: int, community_id: int) -> None:
-        """
-        RAISES
-            IndexError - account_id was not found
-        """
-        account = self._listened_accounts[account_id]
-        account.subscribe_community(community_id)
+        return account
 
     @check_loaded
-    async def load_tweets():
-        pass
+    async def load_tweets(self):
+        for account in self._listened_accounts.values():
+            account_tweets = await account.get_latest_tweets(self._client)
+            
+
+            if len(account_tweets.tweets) > 0:
+                await event_bus.emit("new_tweets", account_tweets)

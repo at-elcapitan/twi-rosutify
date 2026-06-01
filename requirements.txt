@@ -4,3 +4,4 @@ colorama
 python-dotenv
 sqlalchemy
 aiosqlite
+apscheduler

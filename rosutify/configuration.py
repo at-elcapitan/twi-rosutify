@@ -57,7 +57,15 @@ ENV_VARIABLES = [
     EnvVar(
         "DB_PATH",
         required=True
-    )
+    ),
+    EnvVar(
+        "TW_USER_FETCH",
+        required=True
+    ),
+    EnvVar(
+        "CHAT_ID",
+        required=True
+    ),
 ]
 
 try:

@@ -1,12 +1,12 @@
-from urllib.parse import quote_plus
+from functools import wraps
+import inspect
 
-import sqlite3
 from sqlalchemy import event
-from typing import Callable
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
 from .scheme import Base
 from ..configuration import configuration
+from . import user, community as community_db, notify_entity as notify_entity_db
 
 DB_URL = f"sqlite+aiosqlite:///{configuration["DB_PATH"]}"
 
@@ -29,20 +29,21 @@ async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+def get_session(handler):
+    sig = inspect.signature(handler)
 
-def get_session(handler: Callable):
-    async def dec(*args, **kwargs):
+    @wraps(handler)
+    async def wrapper(*args, **kwargs):
         async with session_local() as session:
-            kwargs["session"] = session
-
+            bound_args = sig.bind_partial(*args, **kwargs)
+            bound_args.arguments['session'] = session
+            
             try:
-                return await handler(*args, **kwargs)
-            except Exception as e:
+                return await handler(*bound_args.args, **bound_args.kwargs)
+            except Exception:
                 await session.rollback()
-                raise e
-            finally:
-                await session.close()
-        
-    return dec
+                raise
 
-__all__ = ["init_db", "get_session"]
+    return wrapper
+
+__all__ = ["init_db", "get_session", "user"]

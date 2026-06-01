@@ -21,12 +21,6 @@ class Bus:
             if inspect.isawaitable(res):
                 tasks.append(res)
 
-            self._logger.debug(
-                "emitted signal=%s handler=%s",
-                signal_name,
-                getattr(handler, "__qualname__", handler.__name__)
-            )
-
         await asyncio.gather(*tasks)
 
     def subscribe(self, signal_name: str):

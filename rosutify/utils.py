@@ -1,4 +1,5 @@
 from datetime import datetime
+from functools import wraps
 
 from aiogram import __version__ as aiogram_version
 from twikit import __version__ as twikit_version
@@ -34,15 +35,26 @@ def print_info():
 
 
 def check_loaded(func):
+    @wraps(func)
     async def wrapper(*args, **kwargs):
-        if not args[0]._loaded:
+        self = args[0]
+
+        if not getattr(self, "_loaded", False):
             raise ValueError("Client was not lazy loaded")
+
         return await func(*args, **kwargs)
+
     return wrapper
 
+
 def check_loaded_sync(func):
-    async def wrapper(*args, **kwargs):
-        if not args[0]._loaded:
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        self = args[0]
+
+        if not getattr(self, "_loaded", False):
             raise ValueError("Client was not lazy loaded")
+
         return func(*args, **kwargs)
+
     return wrapper
