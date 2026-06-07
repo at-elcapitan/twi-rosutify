@@ -59,7 +59,7 @@ async def is_fetched_entity_picked(
 async def get_fetched_entities_ids_unique(
     session: AsyncSession,
     notify_entity_id: int,
-    limit: int = 10
+    limit: int = 20
 ) -> list[int]:
     res = await session.execute(
         select(FetchedEntity.twi_id)

@@ -86,3 +86,14 @@ async def check_admin_inited(
     )
 
     return res.scalar()
+
+
+async def is_user_in_database(
+    session: AsyncSession,
+    user_id: int
+) -> bool:
+    res = await session.execute(
+        select(exists().where(User.id == user_id))
+    )
+
+    return res.scalar()
