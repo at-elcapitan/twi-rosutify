@@ -59,7 +59,7 @@ ENV_VARIABLES = [
         required=True
     ),
     EnvVar(
-        "TW_USER_FETCH",
+        "TW_USERS_FETCH",
         required=True
     ),
     EnvVar(

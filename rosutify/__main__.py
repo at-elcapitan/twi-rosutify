@@ -4,6 +4,7 @@ import asyncio
 from rosutify.twclient.fetch_account import TwiAccountLazy
 from sqlalchemy.ext.asyncio import AsyncSession
 from rosutify import logger
+from aiohttp import web
 
 from .db import get_session, community as community_db, notify_entity as notify_entity_db
 from .configuration import configuration
@@ -12,6 +13,7 @@ from .tgclient import dp, bot
 from .twclient import client
 from .logger import logger
 from . import utils, db
+from .api import runner
 
 
 @db.get_session
@@ -29,14 +31,17 @@ async def on_startup(session: AsyncSession):
         cookies_path="cookies.json"
     )
 
-    await client.add_account(
-        TwiAccountLazy(
-            twi_username=configuration["TW_USER_FETCH"],
-            twi_id=None
-        )
-    )
+    twi_accounts = configuration["TW_USERS_FETCH"].split(",")
 
-    # for 0.0.1 only - create initial community and notify entity if not exist
+    for twi_username in twi_accounts:
+        await client.add_account(
+            TwiAccountLazy(
+                twi_username=twi_username,
+                twi_id=None
+            )
+        )
+
+    # for 0.1.0 only - create initial community and notify entity if not exist
     if await community_db.get_community_by_channel_id(session, configuration["CHAT_ID"]) is None:
         community = await community_db.create_community(
             session=session,
@@ -74,7 +79,16 @@ async def main():
     dp.shutdown.register(on_shutdown)
 
     utils.print_info()
-    await dp.start_polling(bot)
+
+    await runner.setup()
+
+    site = web.TCPSite(runner, "0.0.0.0", "17001")
+
+    logger.info("Starting bot and API")
+    await asyncio.gather(
+        dp.start_polling(bot),
+        site.start()
+    )
 
 
 if __name__ == "__main__":

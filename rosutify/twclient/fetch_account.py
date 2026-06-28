@@ -136,7 +136,7 @@ class TwiAccountLazy:
         )
 
         for tweet in tweets:
-            if int(tweet.id) not in self._seen_tweets:
+            if int(tweet.id) not in self._seen_tweets and not tweet.retweeted_tweet:
                 ret.append(tweet) 
                 self._seen_tweets.add(int(tweet.id))
 

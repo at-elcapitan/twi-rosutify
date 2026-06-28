@@ -37,7 +37,6 @@ class ClientWrapper:
     async def load_tweets(self):
         for account in self._listened_accounts.values():
             account_tweets = await account.get_latest_tweets(self._client)
-            
 
             if len(account_tweets.tweets) > 0:
                 await event_bus.emit("new_tweets", account_tweets)

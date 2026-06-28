@@ -1,4 +1,4 @@
-from sqlalchemy import exists, select, update
+from sqlalchemy import exists, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -63,11 +63,12 @@ async def get_fetched_entities_ids_unique(
 ) -> list[int]:
     res = await session.execute(
         select(FetchedEntity.twi_id)
-            .where(
-                FetchedEntity.notify_entity_id == notify_entity_id
-            )
-            .distinct()
-            .limit(limit)
+        .where(
+            FetchedEntity.notify_entity_id == notify_entity_id
+        )
+        .group_by(FetchedEntity.twi_id)
+        .order_by(func.max(FetchedEntity.id).desc())
+        .limit(limit)
     )
 
     return res.scalars().all()
