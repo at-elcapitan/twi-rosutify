@@ -18,7 +18,7 @@ router = Router()
 @get_session
 async def show_tasks(callback: CallbackQuery, callback_data: FetchedEntityCallback, session: AsyncSession):
     if not await user_db.is_user_in_database(session, callback.from_user.id):
-        await callback.answer("You are not registered in the system. Please contact the administrator.", show_alert=True)
+        await callback.answer("You are not registered in the system. Please, start the bot with /start command", show_alert=True)
         return
 
     entity_id = callback_data.entity_id

@@ -49,16 +49,17 @@ async def on_startup(session: AsyncSession):
             connected_channel=configuration["CHAT_ID"],
         )
 
-        notify_entity_id = await notify_entity_db.get_notify_entity_by_username(
-            session=session,
-            twi_username=configuration["TW_USER_FETCH"]
-        )
+        for twi_username in twi_accounts:
+            notify_entity_id = await notify_entity_db.get_notify_entity_by_username(
+                session=session,
+                twi_username=twi_username
+            )
 
-        await community_db.add_notify_entity(
-            session=session,
-            community_id=community.id,
-            notify_entity_id=notify_entity_id.id
-        )
+            await community_db.add_notify_entity(
+                session=session,
+                community_id=community.id,
+                notify_entity_id=notify_entity_id.id
+            )
 
     logger.info("Twitter client ready")
 
