@@ -41,6 +41,12 @@ class Community(Base):
 	fetched_entity: Mapped[list[FetchedEntity]] = relationship(
 		back_populates="community"
 	)
+	telegram_notify_entity: Mapped[list[TelegramNotifyEntity]] = relationship(
+		back_populates="community"
+	)
+	telegram_fetched_entity: Mapped[list[TelegramNotifyMessage]] = relationship(
+		back_populates="community"
+	)
 
 
 class NotifyEntity(Base):
@@ -92,6 +98,9 @@ class User(Base):
 	fetched_entity: Mapped[list[FetchedEntity]] = relationship(
 		back_populates="user"
 	)
+	telegram_fetched_entity: Mapped[list[TelegramNotifyMessage]] = relationship(
+		back_populates="user"
+	)
 
 
 class FetchedEntity(Base):
@@ -114,4 +123,45 @@ class FetchedEntity(Base):
 	)
 	notify_entity: Mapped[NotifyEntity] = relationship(
 		back_populates="fetched_entity"
+	)
+
+
+class TelegramNotifyEntity(Base):
+	__tablename__ = "telegram_notify_entity"
+
+	id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+	tg_id: Mapped[int] = mapped_column(nullable=False)
+	tg_channel_id: Mapped[int] = mapped_column(nullable=False)
+	forward_to_community: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+	community_id: Mapped[int] = mapped_column(ForeignKey("community.id"), nullable=False)
+
+	community: Mapped[Community] = relationship(
+		back_populates="telegram_notify_entity"
+	)
+	telegram_fetched_entity: Mapped[list[TelegramNotifyMessage]] = relationship(
+		back_populates="telegram_notify_entity"
+	)
+
+
+class TelegramNotifyMessage(Base):
+	__tablename__ = "telegram_notify_message"
+
+	id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+	tg_message_id: Mapped[int] = mapped_column(nullable=False)
+	text: Mapped[str] = mapped_column(Text, nullable=False)
+	picked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+	community_id: Mapped[int] = mapped_column(ForeignKey("community.id"), nullable=False)
+	picked_by_user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=True, default=None)
+	tg_notify_entity_id: Mapped[int] = mapped_column(ForeignKey("telegram_notify_entity.id"), nullable=False)
+
+	community: Mapped[Community] = relationship(
+		back_populates="telegram_fetched_entity"
+	)
+	user: Mapped[User] = relationship(
+		back_populates="telegram_fetched_entity"
+	)
+	telegram_notify_entity: Mapped[TelegramNotifyEntity] = relationship(
+		back_populates="telegram_fetched_entity"
 	)
