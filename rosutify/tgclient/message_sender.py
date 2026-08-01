@@ -18,7 +18,6 @@ class SendingInformation:
 
 
 @event_bus.subscribe("send_community")
-@get_session
 async def send_tweet_notification(info: SendingInformation) -> None:
     author = md.bold(md.quote(info.author))
     link = md.link("Open on X/Twitter", info.link)

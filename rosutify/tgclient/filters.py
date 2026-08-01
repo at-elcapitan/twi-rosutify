@@ -8,3 +8,8 @@ class Action(StrEnum):
 class FetchedEntityCallback(CallbackData, prefix="FE"):
     action: Action
     entity_id: int
+
+
+class TGFetchedEntityCallback(CallbackData, prefix="TG"):
+    action: Action
+    entity_id: int

@@ -10,6 +10,10 @@ from ..db import get_session, user as user_db
 
 router = Router()
 
+class WaitingForwardedMessage(StatesGroup):
+    waiting = State()
+
+
 @router.message(CommandStart())
 @get_session
 async def check_initialized(message: types.Message, session: AsyncSession):
@@ -52,3 +56,25 @@ async def check_initialized(message: types.Message, session: AsyncSession):
         builder.button(text="⚙️ Management", callback_data="b:management")
 
     await message.reply(f"Welcome back, {message.from_user.full_name}!", reply_markup=builder.as_markup())
+
+
+@router.message(Command("get_id"))
+async def get_user_id(message: types.Message, state: FSMContext):
+    await message.reply("Please forward the message")
+    await state.set_state(WaitingForwardedMessage.waiting)
+
+
+@router.message(StateFilter(WaitingForwardedMessage.waiting))
+async def send_user_id(message: types.Message, state: FSMContext):
+    if not message.forward_from:
+        await message.reply("User ID could not be extracted")
+        await state.clear()
+        return
+
+    await message.reply(f"User ID: {message.forward_from.id}")
+    await state.clear()
+
+
+@router.message(Command("chat_id"))
+async def get_chat_id(message: types.Message):
+    await message.reply(f"Chat ID: {message.chat.id}")

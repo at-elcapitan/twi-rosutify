@@ -9,7 +9,7 @@ from aiohttp import web
 from .db import get_session, community as community_db, notify_entity as notify_entity_db
 from .configuration import configuration
 from .scheduler import scheduler
-from .tgclient import dp, bot
+from .tgclient import dp, bot, init as tgctl_init
 from .twclient import client
 from .logger import logger
 from . import utils, db
@@ -61,7 +61,11 @@ async def on_startup(session: AsyncSession):
                 notify_entity_id=notify_entity_id.id
             )
 
-    logger.info("Twitter client ready")
+    logger.info("TWClient ready")
+
+    await tgctl_init(session)
+
+    logger.info("TGCTL ready")
 
     scheduler.add_job(client.load_tweets, "interval", minutes=5)
     scheduler.add_job(client.load_tweets, "date", run_date=datetime.now() + timedelta(seconds=10))
@@ -85,7 +89,7 @@ async def main():
 
     site = web.TCPSite(runner, "0.0.0.0", "17001")
 
-    logger.info("Starting bot and API")
+    logger.info("Starting rosutify")
     await asyncio.gather(
         dp.start_polling(bot),
         site.start()
