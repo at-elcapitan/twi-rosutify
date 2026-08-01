@@ -6,11 +6,18 @@ from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..db import get_session, user as user_db
+from .bot import bot
+from ..db import get_session, user as user_db, community as community_db
+from ..logger import logger
 
 router = Router()
 
+
 class WaitingForwardedMessage(StatesGroup):
+    waiting = State()
+
+
+class NotifyAllCommunitiesState(StatesGroup):
     waiting = State()
 
 
@@ -78,3 +85,36 @@ async def send_user_id(message: types.Message, state: FSMContext):
 @router.message(Command("chat_id"))
 async def get_chat_id(message: types.Message):
     await message.reply(f"Chat ID: {message.chat.id}")
+
+
+@router.message(Command("notify_all_communities"))
+@get_session
+async def notify_all_communities_with_message(message: types.Message, state: FSMContext, session: AsyncSession):
+    if not await user_db.is_user_in_database(session, message.from_user.id):
+        await message.reply("You are not registered in the system. Please, start the bot with /start command")
+        return
+
+    if not await user_db.check_user_admin(session, message.from_user.id):
+        await message.reply("Access denied")
+        return
+
+    await message.reply("Please send the message to notify all communities")
+    await state.set_state(NotifyAllCommunitiesState.waiting)
+
+
+@router.message(StateFilter(NotifyAllCommunitiesState.waiting))
+@get_session
+async def send_notification(message: types.Message, state: FSMContext, session: AsyncSession):
+    communities = await community_db.get_all_community_channel_ids(session)
+
+    logger.info(f"Sending notification to {len(communities)} communities")
+
+    for community_id in communities:
+        try:
+            await bot.send_message(
+                chat_id=community_id,
+                text=message.text,
+                parse_mode="HTML"
+            )
+        except Exception as e:
+            await message.reply(f"Failed to send message to community {community_id}: {e}")

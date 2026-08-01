@@ -23,6 +23,13 @@ router = Router()
 @router.message()
 @get_session
 async def handle_message(message: types.Message, session: AsyncSession):
+    logger.debug(
+        "Received message from chat_id=%d, tg_id=%d, text=%s",
+        message.chat.id,
+        message.from_user.id,
+        message.text
+    )
+
     chat_ids = tg_notify_controller.get_chat_ids()
 
     if not message.chat.id in chat_ids:
@@ -55,6 +62,13 @@ async def handle_message(message: types.Message, session: AsyncSession):
         )
 
         return
+
+    logger.debug(
+        "Received message from chat_id=%d, tg_id=%d, notify_entity_id=%d",
+        message.chat.id,
+        message.from_user.id,
+        notify_entity.id
+    )
 
     notify_message = await notify_entity_db.create_tg_message(
         session=session,

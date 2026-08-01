@@ -68,3 +68,13 @@ async def add_notify_entity(
     )
 
     await session.commit()
+
+
+async def get_all_community_channel_ids(
+    session: AsyncSession
+) -> list[int]:
+    res = await session.execute(
+        select(Community.connected_channel)
+    )
+
+    return res.scalars().all()
