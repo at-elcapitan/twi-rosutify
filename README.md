@@ -3,7 +3,7 @@
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) 
 ![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white) 
 
-# Rosutify for Telegram
+# R.I.N.A. for Telegram
 
 Rosutify is a simple and useful Telegram-bot that connects to the X (Twitter) and alarms about some updates without paid API key needed.
 
