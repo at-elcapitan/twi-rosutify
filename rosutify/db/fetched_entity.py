@@ -2,7 +2,7 @@ from sqlalchemy import exists, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from .scheme import FetchedEntity
+from .scheme import FetchedEntity, Community
 
 
 async def create_fetched_entity(
@@ -72,3 +72,43 @@ async def get_fetched_entities_ids_unique(
     )
 
     return res.scalars().all()
+
+
+async def get_community_statistics(session: AsyncSession, community_chat_id: int) -> dict:
+    res = await session.execute(
+        select(
+            FetchedEntity.picked_by_user_id,
+            func.count()
+        )
+        .select_from(FetchedEntity)
+        .join(Community, FetchedEntity.community_id == Community.id)
+        .where(Community.connected_channel == community_chat_id)
+        .where(FetchedEntity.picked == True)
+        .group_by(FetchedEntity.picked_by_user_id)
+    )
+
+    return res.all()
+
+
+async def get_community_count_taken_messages(session: AsyncSession, community_chat_id: int) -> int:
+    res = await session.execute(
+        select(func.count())
+        .select_from(FetchedEntity)
+        .join(Community, FetchedEntity.community_id == Community.id)
+        .where(Community.connected_channel == community_chat_id)
+        .where(FetchedEntity.picked == True)
+    )
+
+    return res.scalar()
+
+
+async def get_community_count_untaken_messages(session: AsyncSession, community_chat_id: int) -> int:
+    res = await session.execute(
+        select(func.count())
+        .select_from(FetchedEntity)
+        .join(Community, FetchedEntity.community_id == Community.id)
+        .where(Community.connected_channel == community_chat_id)
+        .where(FetchedEntity.picked == False)
+    )
+
+    return res.scalar()

@@ -112,3 +112,17 @@ async def set_tg_message_picked(
 
     session.add(tg_message)
     await session.commit()
+
+
+async def is_entity_picked(
+    session: AsyncSession,
+    tg_message_id: int
+) -> bool:
+    res = await session.execute(
+        select(exists().where(
+            TelegramNotifyMessage.tg_message_id == tg_message_id,
+            TelegramNotifyMessage.picked.is_(True)
+        ))
+    )
+
+    return res.scalar()

@@ -1,5 +1,5 @@
 from aiogram import types, F, Router
-from aiogram.types import CallbackQuery, ReplyKeyboardMarkup
+from aiogram.types import CallbackQuery, ReplyKeyboardMarkup, InputRichMessage
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.filters import CommandStart, Command, StateFilter
@@ -34,7 +34,12 @@ async def check_initialized(message: types.Message, session: AsyncSession):
     if not is_initialized:
         await message.reply("Setting up admin user...")
 
-        await user_db.create_user(session, user_id=message.from_user.id, is_superuser=True)
+        await user_db.create_user(
+            session, 
+            user_id=message.from_user.id, 
+            is_superuser=True,
+            username=message.from_user.username
+        )
 
         builder.adjust(2)
         builder.button(text="⚙️ Management", callback_data="b:management")
@@ -50,7 +55,7 @@ async def check_initialized(message: types.Message, session: AsyncSession):
     if user is None:
         await message.reply("Initializing account, please wait...")
 
-        await user_db.create_user(session, user_id=message.from_user.id)
+        await user_db.create_user(session, user_id=message.from_user.id, username=message.from_user.username)
 
         await message.reply(
             "Account initialized. Сontact community admins for adding you to communities.",
@@ -111,10 +116,9 @@ async def send_notification(message: types.Message, state: FSMContext, session: 
 
     for community_id in communities:
         try:
-            await bot.send_message(
+            await bot.send_rich_message(
                 chat_id=community_id,
-                text=message.text,
-                parse_mode="HTML"
+                rich_message=InputRichMessage(markdown=message.text)
             )
         except Exception as e:
             await message.reply(f"Failed to send message to community {community_id}: {e}")

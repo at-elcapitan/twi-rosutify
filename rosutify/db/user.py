@@ -22,13 +22,15 @@ async def create_user(
     user_id: int,
     dm_initialized: bool = False,
     promotion_allowed: bool = False,
-    is_superuser: bool = False
+    is_superuser: bool = False,
+    username: str | None = None
 ) -> User:
     user = User(
         id=user_id,
         dm_initialized=dm_initialized,
         promotion_allowed=promotion_allowed,
-        is_superuser=is_superuser
+        is_superuser=is_superuser,
+        username=username
     )
 
     session.add(user)
@@ -108,3 +110,15 @@ async def check_user_admin(
     )
 
     return res.scalar()
+
+
+async def get_user_by_id(
+    session: AsyncSession,
+    user_id: int
+) -> User | None:
+    res = await session.execute(
+        select(User)
+            .where(User.id == user_id)
+            .options(selectinload(User.user_in_community).selectinload(UserInCommunity.community))
+    )
+    return res.scalars().first()

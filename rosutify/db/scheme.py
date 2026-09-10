@@ -90,6 +90,7 @@ class User(Base):
 	dm_initialized: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 	promotion_allowed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 	is_superuser: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+	username: Mapped[str] = mapped_column(String(64), nullable=True, default=None)
 
 	user_in_community: Mapped[list[UserInCommunity]] = relationship(
 		back_populates="user",

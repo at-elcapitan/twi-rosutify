@@ -78,3 +78,14 @@ async def get_all_community_channel_ids(
     )
 
     return res.scalars().all()
+
+
+async def get_community_exists_by_channel_id(
+    session: AsyncSession,
+    channel_id: int
+) -> bool:
+    res = await session.execute(
+        select(exists().where(Community.connected_channel == channel_id))
+    )
+
+    return res.scalar()
