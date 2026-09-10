@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import asyncio
+import sys
 
 from rosutify.twclient.fetch_account import TwiAccountLazy
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +12,7 @@ from .configuration import configuration
 from .scheduler import scheduler
 from .tgclient import dp, bot, init as tgctl_init
 from .twclient import client
-from .logger import logger
+from .logger import logger, application_status
 from . import utils, db
 from .api import runner
 
@@ -80,6 +81,9 @@ async def on_shutdown():
 
 
 async def main():
+    loop = asyncio.get_event_loop()
+    loop.set_exception_handler(application_status.async_exception_handler)
+
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
 
@@ -97,4 +101,5 @@ async def main():
 
 
 if __name__ == "__main__":
+    sys.excepthook = application_status.exception_handler
     asyncio.run(main())
