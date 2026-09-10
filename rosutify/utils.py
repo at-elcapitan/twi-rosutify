@@ -24,7 +24,7 @@ class Colors:
 
 def print_info():
     print(f"{Colors.BLUE}╭──")
-    print(f"{Colors.BLUE}│{Colors.RESET}  {Colors.BOLD}{Colors.HEADER}Rosutify{Colors.RESET} {Colors.CYAN}v{current_version}{Colors.RESET} \"{Colors.YELLOW}{current_codename}{Colors.RESET}\"")
+    print(f"{Colors.BLUE}│{Colors.RESET}  {Colors.BOLD}{Colors.HEADER}R.I.N.A.{Colors.RESET} {Colors.CYAN}v{current_version}{Colors.RESET} \"{Colors.YELLOW}{current_codename}{Colors.RESET}\"")
     print(f"{Colors.BLUE}│{Colors.RESET}")
     print(f"{Colors.BLUE}│{Colors.RESET}  {Colors.BOLD}Dependencies:")
     print(f"{Colors.BLUE}│{Colors.RESET}  {Colors.GREEN}-{Colors.RESET} Aiogram:  {Colors.CYAN}v{aiogram_version}")
