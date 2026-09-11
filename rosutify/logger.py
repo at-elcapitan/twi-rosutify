@@ -2,47 +2,90 @@ import os
 import sys
 import logging
 from datetime import datetime
+import traceback
+from aiogram.exceptions import TelegramNetworkError, TelegramServerError
 
+from alembic.util import msg
 import colorama
 from dotenv import load_dotenv
 
 load_dotenv()
 
 LOGLEVEL = os.environ.get('LOGLEVEL')
+TRACEBACK_LOG = os.environ.get('TRACEBACK_LOG', 'rina.log')
 
 colorama.init(autoreset=True)
+
+NETWORK_EXCEPTIONS = (
+    TelegramNetworkError,
+    TelegramServerError
+)
 
 class ApplicationStatus:
     def __init__(self):
         self._ok = True
+        self._network_exceptions_counter = 0
+        self._unknown_exceptions_counter = 0
+        self._last_network_exception_time = None
+
+    def _handle_network_exception(self):
+        if datetime.now().timestamp() - (self._last_network_exception_time or 0) > 60:
+            self._network_exceptions_counter = 1
+            self._last_network_exception_time = datetime.now().timestamp()
+            return
+
+        self._network_exceptions_counter += 1
+        self._last_network_exception_time = datetime.now().timestamp()
+
+        if self._network_exceptions_counter >= 5:
+            self._ok = False
+
+    def _handle_unknown_exception(self):
+        if self._unknown_exceptions_counter >= 5:
+            self._ok = False
+
+        self._unknown_exceptions_counter += 1
+
+    def _check_exception(self, exc_type, exc_value, exc_traceback):
+        with open(TRACEBACK_LOG, "a") as f:
+            formatted_tb = traceback.format_tb(exc_traceback)
+            splitted_tb = "\t".join(formatted_tb)
+
+            f.write(f"Exception occurred at {datetime.now().isoformat()}:\n")
+            f.write(f"\t{exc_type.__name__}: {str(exc_value)}\n")
+            f.write(f"\t{splitted_tb}\n\n")
+        
+        if exc_type is None:
+            self._handle_unknown_exception()
+            return
+
+        if issubclass(exc_type, NETWORK_EXCEPTIONS):
+            self._handle_network_exception()
+        else:
+            self._ok = False
 
     def exception_handler(self, exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return
 
-        self._ok = False
+        self._check_exception(exc_type, exc_value, exc_traceback)
 
-        logger.critical(
-            "Uncaught exception handled",
-            exc_info=(exc_type, exc_value, exc_traceback)
-        )
+    def async_exception_handler(self, loop, context):
+        exc = context.get("exception")
+        if exc is None:
+            self._handle_unknown_exception()
+            return
 
-    async def async_exception_handler(self, context):
-        self._ok = False
+        exc_type = type(exc)
+        exc_value = exc
+        exc_traceback = exc.__traceback__
 
-        logger.critical(
-            f"Uncaught exception handled",
-            exc_info=context.get("exception")
-        )
+        self._check_exception(exc_type, exc_value, exc_traceback)
 
     @property
-    def ok(self) -> bool:
+    def ok(self):
         return self._ok
-
-    @ok.setter
-    def ok(self, value: bool):
-        self._ok = value
 
 
 application_status = ApplicationStatus()
@@ -53,11 +96,13 @@ class LoggingHandler(logging.StreamHandler):
         super().__init__(*args, **kwargs)
 
     def emit(self, record):
-        if record.levelno >= logging.ERROR:
-            application_status.ok = False
+        if record.exc_info and record.levelno >= logging.ERROR:
+            exc_type, exc_value, exc_traceback = record.exc_info
+
+            if exc_type is not None:
+                application_status.exception_handler(exc_type, exc_value, exc_traceback)
 
         super().emit(record)
-            
 
 class ColoredFormatter(logging.Formatter):
     COLORS = {

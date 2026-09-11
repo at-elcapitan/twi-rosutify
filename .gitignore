@@ -13,3 +13,6 @@ venv/
 .env
 *.sqlite
 cookies*
+
+# Logs
+*.log
