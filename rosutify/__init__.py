@@ -1,2 +1,2 @@
-__version__ = "0.1.2"
-__codename__ = "Peräjärvi"
+__version__ = "0.2.0-beta.1"
+__codename__ = "Alivieska"

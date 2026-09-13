@@ -60,6 +60,9 @@ ENV_VARIABLES = [
     EnvVar(
         "CHAT_ID",
     ),
+    EnvVar(
+        "GOOGLEAI_API_KEY",
+    ),
 ]
 
 try:

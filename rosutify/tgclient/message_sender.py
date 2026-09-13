@@ -8,6 +8,7 @@ from ..event import event_bus
 from ..db import get_session
 from .bot import bot
 from .filters import FetchedEntityCallback, Action
+from ..ai.translate import translate_and_edit
 
 @dataclass
 class SendingInformation:
@@ -18,7 +19,10 @@ class SendingInformation:
 
 
 @event_bus.subscribe("send_community")
-async def send_tweet_notification(info: SendingInformation) -> None:
+async def send_tweet_notification(
+    info: SendingInformation,
+    original_message_text: str
+) -> None:
     author = md.bold(md.quote(info.author))
     link = md.link("Open on X/Twitter", info.link)
     message = f"New tweet from {author}\n{link}"
@@ -33,7 +37,7 @@ async def send_tweet_notification(info: SendingInformation) -> None:
     )
 
     try:
-        await bot.send_message(
+        sended_message = await bot.send_message(
             chat_id=info.chat_id,
             text=message,
             parse_mode="MarkdownV2",
@@ -41,3 +45,11 @@ async def send_tweet_notification(info: SendingInformation) -> None:
         )
     except Exception as e:
         logger.error(f"Failed to send message: {e}")
+
+    await event_bus.emit(
+        "translate_message",
+        text=original_message_text,
+        tg_message=sended_message,
+        tg_message_text=message,
+        fetched_entity_id=info.fetched_entity_id
+    )

@@ -34,8 +34,6 @@ async def on_new_tweets(account_tweets: TwiAccountTweets, session: AsyncSession)
     )
 
     for tweet in account_tweets.tweets:
-        short_text = f"{tweet.text[:280]}{'...' if len(tweet.text) > 280 else ''}"
-        
         for community in communities:
             fetched_entity = await fetched_entity_db.create_fetched_entity(
                 session=session,
@@ -52,5 +50,6 @@ async def on_new_tweets(account_tweets: TwiAccountTweets, session: AsyncSession)
                     author=account_tweets.username,
                     link=f"https://twitter.com/{account_tweets.username}/status/{tweet.id}",
                     fetched_entity_id=fetched_entity.id
-                )
+                ),
+                tweet.text
             )

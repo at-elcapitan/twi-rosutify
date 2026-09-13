@@ -1,5 +1,5 @@
-aiogram
-twikit
+aiogram~=3.31.0
+# twikit
 colorama
 python-dotenv
 sqlalchemy
@@ -7,3 +7,4 @@ aiosqlite
 apscheduler
 aiohttp
 alembic
+google-genai[aiohttp]~=2.23.0

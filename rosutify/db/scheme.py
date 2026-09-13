@@ -110,6 +110,7 @@ class FetchedEntity(Base):
 	id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 	twi_id: Mapped[int] = mapped_column(nullable=False)
 	text: Mapped[str] = mapped_column(Text, nullable=False)
+	translated_text: Mapped[str] = mapped_column(Text, nullable=True)
 	picked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
 	community_id: Mapped[int] = mapped_column(ForeignKey("community.id"), nullable=False)

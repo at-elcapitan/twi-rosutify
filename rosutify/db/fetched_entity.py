@@ -112,3 +112,19 @@ async def get_community_count_untaken_messages(session: AsyncSession, community_
     )
 
     return res.scalar()
+
+
+async def set_translation_for_entity(
+    session: AsyncSession, 
+    fetched_entity_id: int,
+    translated_text: str
+):
+    await session.execute(
+            update(FetchedEntity)
+            .where(FetchedEntity.id == fetched_entity_id)
+            .values(
+                translated_text=translated_text
+            )
+        )
+
+    await session.commit()

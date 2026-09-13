@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-LOGLEVEL = os.environ.get('LOGLEVEL')
+LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
 TRACEBACK_LOG = os.environ.get('TRACEBACK_LOG', 'rina.log')
 
 colorama.init(autoreset=True)
